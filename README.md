@@ -3,6 +3,14 @@
 ribd <img src="man/figures/logo.png" align="right" height=140/>
 ===============================================================
 
+<!-- badges: start -->
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version/ribd)](https://CRAN.R-project.org/package=ribd)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/ribd?color=yellow)](https://cran.r-project.org/package=ribd)
+[![](https://cranlogs.r-pkg.org/badges/last-month/ribd?color=yellow)](https://cran.r-project.org/package=ribd)
+<!-- badges: end -->
+
 Overview
 --------
 
@@ -11,7 +19,7 @@ identity-by-descent (IBD) between pedigree members. It extends the
 `pedtools` package which provides useful utilities for pedigree
 construction and manipulation.
 
-The main functions in ribd compute the following pairwise coefficients:
+The main functions in `ribd` are the following:
 
 -   `kinship()`, `kinshipX()` : Kinship coefficients
 -   `inbreeding()`, `inbreedingX()` : Inbreeding coefficients
@@ -43,13 +51,18 @@ coefficients:
 Installation
 ------------
 
-`ribd` is available for download from GitHub as follows:
+To get the current official version of `ribd`, install from CRAN as
+follows:
 
 ``` r
- # First install devtools if needed
-if(!require(devtools)) install.packages("devtools")
+install.packages("ribd")
+```
 
-# Install ribd from github
+Alternatively, you can obtain the latest development version from
+GitHub:
+
+``` r
+# install.packages("devtools") # install devtools if needed
 devtools::install_github("magnusdv/ribd")
 ```
 
@@ -110,8 +123,8 @@ question by running `condensedIdentity()` on `z`.
 
 ``` r
 condensedIdentity(z, ids = 5:6)
-#> [1] 0.06640625 0.03515625 0.13281250 0.03125000 0.13281250 0.03125000
-#> [7] 0.21875000 0.29687500 0.05468750
+#> [1] 0.06640625 0.03515625 0.13281250 0.03125000 0.13281250 0.03125000 0.21875000
+#> [8] 0.29687500 0.05468750
 ```
 
 Although the above strategy worked nicely in this case, it quickly gets
@@ -135,8 +148,8 @@ into account, giving the same answer as for `z` above.
 
 ``` r
 condensedIdentity(x, ids = 5:6)
-#> [1] 0.06640625 0.03515625 0.13281250 0.03125000 0.13281250 0.03125000
-#> [7] 0.21875000 0.29687500 0.05468750
+#> [1] 0.06640625 0.03515625 0.13281250 0.03125000 0.13281250 0.03125000 0.21875000
+#> [8] 0.29687500 0.05468750
 ```
 
 The pairwise condensed identity states
@@ -166,10 +179,10 @@ Males, being hemizygous, have only 1 allele of a locus on X. Hence when
 males are involved the total number of alleles is less than 4, rendering
 the autosomal states pictured above meaningless. However, to avoid
 drawing (and learning the ordering of) new states for each sex
-combination, we re-use the autosomal states by using the following
-simple rule: **Replace the single allele of any male, with a pair of
-autozygous alleles**. In this way we get a one-to-one map from the X
-states to the autosomal state.
+combination, we can re-use the autosomal state pictograms by invoking
+the following simple rule: **Replace the single allele of any male, with
+a pair of autozygous alleles**. This gives a one-to-one map from the X
+states to the autosomal states.
 
 For simplicity the output always contains 9 coefficients, but with NA’s
 in the positions of undefined states (depending on the sex combination).

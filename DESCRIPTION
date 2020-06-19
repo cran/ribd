@@ -1,7 +1,7 @@
 Package: ribd
 Type: Package
 Title: Pedigree-based Relatedness Coefficients
-Version: 1.0.1
+Version: 1.1.0
 Authors@R: person("Magnus Dehli", "Vigeland", email = "m.d.vigeland@medisin.uio.no", 
                   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9134-4962"))
 Description: Recursive algorithms for computing various relatedness coefficients, 
@@ -23,11 +23,11 @@ LazyData: true
 Depends: R (>= 3.5.0), pedtools
 Imports: slam, kinship2, glue
 Suggests: identity, testthat
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2020-02-03 14:19:35 UTC; magnusdv
+Packaged: 2020-06-19 08:30:03 UTC; magnusdv
 Author: Magnus Dehli Vigeland [aut, cre]
     (<https://orcid.org/0000-0002-9134-4962>)
 Maintainer: Magnus Dehli Vigeland <m.d.vigeland@medisin.uio.no>
 Repository: CRAN
-Date/Publication: 2020-02-03 15:10:08 UTC
+Date/Publication: 2020-06-19 09:00:03 UTC
