@@ -9,14 +9,15 @@
 #' random alleles sampled from A and B at the same autosomal (resp. X) locus,
 #' are identical by descent relative to the pedigree.
 #'
-#' @param x A pedigree, in the form of a [`pedtools::ped`] object.
+#' @param x A `ped` object or a list of such.
 #' @param ids Either a character of length 2, or NULL. In the former case, it
-#'   must contain the ID labels of two members of `x`, and the function will return
-#'   their kinship coefficient as a single number. If `ids` is NULL (this is the
-#'   default), the output is the complete kinship matrix.
-#' @return If `ids = NULL`, a symmetric matrix containing all pairwise kinship coefficients in
-#'   `x`.
-#'   If `ids` has length 2, the function returns a single number.
+#'   must contain the ID labels of two members of `x`, and the function will
+#'   return their kinship coefficient as a single number. If `ids` is NULL (this
+#'   is the default), the output is the complete kinship matrix.
+#'
+#' @return If `ids = NULL`, a symmetric matrix containing all pairwise kinship
+#'   coefficients in `x`. If `ids` has length 2, the function returns a single
+#'   number.
 #'
 #' @seealso [inbreeding()], [kappa()]
 #'
@@ -34,8 +35,37 @@
 #'
 #' @export
 kinship = function(x, ids = NULL) {
-  if(!is.ped(x))
-    stop2("Input is not a `ped` object")
+
+  if(singlepair <- !is.null(ids)) {
+    if(length(ids) != 2)
+      stop2("When `ids` is not NULL, it must be a vector of length 2")
+    IDS = internalID(x, ids)
+  }
+
+  if(is.pedList(x)) {
+
+    if(singlepair) {  # Note: Here IDS is a data frame with cols id, comp, int
+      comp = IDS$comp[1]
+      kin = if(comp == IDS$comp[2]) kinship(x[[comp]], ids) else 0
+      return(kin)
+    }
+
+    # Initialise big matrix
+    ntot = sum(pedsize(x))
+    labs = unlist(labels(x))
+    kinmat = matrix(0, nrow = ntot, ncol = ntot, dimnames = list(labs, labs))
+
+    # Fill in component blocks
+    for(comp in x) {
+      idsComp = labels(comp)
+      kinmat[idsComp, idsComp] = kinship(comp, ids = NULL)
+    }
+
+    return(kinmat)
+  }
+  else if(!is.ped(x))
+    stop2("First argument must be a `ped` object or a list of such")
+
 
   # Ensure standard order of pedigree members
   standardOrder = hasParentsBeforeChildren(x)
@@ -44,11 +74,6 @@ kinship = function(x, ids = NULL) {
     x = parentsBeforeChildren(x)
   }
 
-  if(singlepair <- !is.null(ids)) {
-    if(length(ids) != 2)
-      stop2("When `ids` is not NULL, it must be a vector of length 2")
-    IDS = internalID(x, ids)
-  }
 
   FIDX = x$FIDX
   MIDX = x$MIDX

@@ -1,6 +1,6 @@
-dfdc4063d6fa76d00dff2aa90c154e88 *DESCRIPTION
+327c7ab16d052a5b1a9b059b2885cf21 *DESCRIPTION
 6ef528be0fe440a3610949a48255b818 *NAMESPACE
-0a0de8944acddbbf4c02ab236cc0ee34 *NEWS.md
+81e38d227bb4ba484b559b2bfd725efb *NEWS.md
 b5dd7c6bd3409c8f76359c5969e2ebb9 *R/condensedIdentity.R
 c2cd8e1d7dc02b43577d63aac04bffe4 *R/condensedIdentityX.R
 3ba446364febfefdd7392ec26d16a631 *R/constructPedigree.R
@@ -12,8 +12,8 @@ ed1e5c055a156c88648787b975c1a133 *R/generalisedKinship_karigl.R
 c47974a2a4f641a7066b68255dc40dd4 *R/ibdTriangle.R
 8253fdb96e35623a01dca780d4ae52a0 *R/inbreeding.R
 e215c7f16819a893b38f8438637c71c9 *R/initialiseMemo.R
-1ca1a46f4b4a4f3f2891520d5ee9899b *R/kappaIBD.R
-c83e7ff6c4a5feda5964094a29ef361d *R/kinship.R
+1ca1a46f4b4a4f3f2891520d5ee9899b *R/kappaIbd.R
+dba6a161a9e78dc2d860d55004a887c6 *R/kinship.R
 2d8397318c075da78dcfd7a6cea90925 *R/kinshipX.R
 1972db158470e82640624c1448f028ca *R/multiPersonIBD.R
 f07b58d5c15b3c36327345427828af25 *R/ribd-package.R
@@ -27,7 +27,7 @@ b6abdee804f316d4a52023aea8fbed81 *R/twoLocusPlot.R
 8f6556a069de4145850664b2d7d56434 *R/twoLocus_utils.R
 1b52907ff5438af18c1eeb4b5605c5f4 *R/utils.R
 cb32708f69d097405fd20459113db7d0 *README.md
-88c1accc74954219c3e66af4d16a6a55 *build/partial.rdb
+4dddaa8c1cff8be4ffe5e43719430893 *build/partial.rdb
 1f4831fcefddf691d575b9219f095057 *data/jicaque.rda
 3b77c56e97b0a06b48b2d03662e29f58 *inst/WORDLIST
 efeb27ae6022eadbce4e9294aa02c5b7 *man/condensedIdentity.Rd
@@ -53,7 +53,7 @@ a7f1e2ef4c10db65516eb319488fb6ac *man/ibdTriangle.Rd
 7f6765c620fbe149e66976575b67dadd *man/jicaque.Rd
 65d0c5024b58e2284de2f194565ae99d *man/kappaIBD.Rd
 2b4d1145f27ff075727071fc8e3a6e00 *man/kinPattern.Rd
-67ff34764eb6d681a3a215f26fa88172 *man/kinship.Rd
+bb338b652cd2e8315585d0b3e0052e46 *man/kinship.Rd
 05deb0cc94f9d9037b803728ae416443 *man/minimalPattern.Rd
 dda0a0f7771883f34b3c242ad4cebf8f *man/multiPersonIBD.Rd
 f31bc7be107e00866b6e9b1b6485741f *man/ribd.Rd
@@ -67,7 +67,7 @@ e07fdeee8e19a218a0e0195eec67744c *tests/testthat/test-construct-kappa.R
 046368a438f63cd4b88babafc95cf10b *tests/testthat/test-generalisedKinship.R
 db7e85b4a785366162f2553730a63dc9 *tests/testthat/test-identity.R
 0290bdaad202c14346b643600607d135 *tests/testthat/test-kappa.R
-72eae0d51e535a33ed66a5d1f68516bd *tests/testthat/test-kinship.R
+b4e2a135ab6fcc20abbcc5cbc77bdf7f *tests/testthat/test-kinship.R
 647c46c57df94b7f5adc82564df2fcd0 *tests/testthat/test-two-locus-IBD.R
 9037818960feaab64a402cbbca19201c *tests/testthat/test-two-locus-genkin.R
 86b675cce785be1e4627fa9b71b62b08 *tests/testthat/test-two-locus-identity.R

@@ -79,3 +79,21 @@ test_that("X-chrom inbreeding is computed correctly", {
   expect_equal(inbreedingX(xMat, id = 6), 0.5)
 })
 
+
+test_that("kinship() works in pedlist", {
+  x1 = nuclearPed()
+  x2 = singleton(4)
+  x = list(x1, x2)
+
+  kin = kinship(x)
+
+  expect_equal(kin[1:3, 1:3], kinship(x1))
+  expect_equal(kin[4, 4, drop = F], kinship(x2))
+
+  expect_equal(kinship(x, 2:3), 0.25)
+  expect_equal(kinship(x, 3:4), 0)
+
+  expect_error(kinship(x, 3:5), "When `ids` is not NULL, it must be a vector of length 2")
+  expect_error(kinship(x, 4:5), "Unknown ID label: 5")
+
+})
