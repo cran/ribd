@@ -2,14 +2,16 @@
 #'
 #' Computes the three IBD coefficients summarising the relationship between two
 #' non-inbred individuals. Both autosomal and X chromosomal versions are
-#' implemented.
+#' implemented. The pedigree founders (other than the individuals in question)
+#' are allowed to be inbred; see [pedtools::founderInbreeding()] for how to set
+#' this up, and see Examples below.
 #'
 #' For non-inbred individuals a and b, their autosomal IBD coefficients
 #' \eqn{(\kappa0, \kappa1, \kappa2)} are defined as follows: \deqn{\kappa_i =
-#' P(a and b share i alleles IBD at a random autosomal locus)}
+#' P(a and b share exactly i alleles IBD at a random autosomal locus)}
 #'
 #' The autosomal kappa coefficients are computed from the kinship coefficients.
-#' When a and b are both nonfounders, the following formulas are well-known:
+#' When a and b are both nonfounders, the following formulas hold:
 #'
 #' * \eqn{\kappa2 = \phi_MM * \phi_FF + \phi_MF * \phi_FM}
 #'
@@ -21,18 +23,18 @@
 #' and b, and so on. If either a or b is a founder, then \eqn{\kappa2 = 0},
 #' while the other two formulas remain as above.
 #'
-#' The X chromosomal IBD coefficients are defined as in the autosomal case, with
-#' the exception that \eqn{\kappa2} is undefined when at least one of the two
-#' individuals is male. Hence the computation is greatly simplified when males
-#' are involved. Denoting the standard kinship coefficient by \eqn{\phi}, the
-#' formulas are:
+#' The X-chromosomal IBD coefficients are defined similarly to the autosomal
+#' case. Here \eqn{\kappa2} is undefined when one or both individuals are male,
+#' which greatly simplifies the calculations when males are involved. The
+#' formulas are (with \eqn{\phi_ab} referring to the X-chromosomal kinship
+#' coefficient):
 #'
-#' * Both male: \eqn{(\kappa0, \kappa1, \kappa2) = (1-\phi, \phi, NA)}
+#' * Both male: \eqn{(\kappa0, \kappa1, \kappa2) = (1-\phi_ab, \phi_ab, NA)}
 #'
-#' * One male, one female: \eqn{(\kappa0, \kappa1, \kappa2) = (1-2*\phi, 2*\phi,
-#' NA)}
+#' * One male, one female: \eqn{(\kappa0, \kappa1, \kappa2) = (1-2*\phi_ab,
+#' 2*\phi_ab, NA)}
 #'
-#' * Two females: As in the autosomal case.
+#' * Two females: Similar formulas as in the autosomal case.
 #'
 #' @param x A pedigree in the form of a `ped` object (or a list of such).
 #' @param ids A character (or coercible to character) containing ID labels of
@@ -43,11 +45,8 @@
 #'   cases the coefficients are reported as `NA`.
 #' @param simplify Simplify the output (to a numeric of length 3) if `ids` has
 #'   length 2. Default: TRUE.
-#' @param sparse A positive integer, indicating the pedigree size limit for
-#'   using sparse arrays (as implemented by the
-#'   [slam](https://CRAN.R-project.org/package=slam) package) instead of
-#'   ordinary arrays.
-#' @param verbose A logical.
+#' @param Xchrom A logical, indicating if the autosomal (default) or
+#'   X-chromosomal kappa coefficients should be computed.
 #'
 #' @return If `ids` has length 2 and `simplify = TRUE`: A numeric vector of
 #'   length 3: \eqn{(\kappa0, \kappa1, \kappa2)}.
@@ -57,20 +56,23 @@
 #'   contain the IBD coefficients.
 #'
 #'   Unless `inbredAction = 2`, the coefficients of pairs involving inbred
-#'   individuals (inbred *females* in the X version) are reported as NA.
-#'   Furthermore, the X chromosomal \eqn{\kappa2} is NA whenever at least one of
+#'   individuals (X-inbred females if `Xchrom = T`) are reported as NA.
+#'   Furthermore, the X-chromosomal \eqn{\kappa2} is NA whenever at least one of
 #'   the two individuals is male.
 #'
-#' @seealso [kinship()], [condensedIdentity()]
+#' @seealso [kinship()], [identityCoefs()]
+#'
 #' @examples
 #' ### Siblings
 #' x = nuclearPed(2)
+#' kappaIBD(x)
+#'
 #' k = kappaIBD(x, 3:4)
 #' stopifnot(identical(k, c(.25, .5, .25)))
 #'
 #' ### Quad half first cousins
 #' x = quadHalfFirstCousins()
-#' k = kappaIBD(x, leaves(x))
+#' k = kappaIBD(x, ids = leaves(x))
 #' stopifnot(identical(k, c(17/32, 14/32, 1/32)))
 #'
 #' ### Paternal half brothers with 100% inbred father
@@ -85,8 +87,12 @@
 #' k = kappaIBD(x, ids)
 #' stopifnot(identical(k, c(0, 1, 0)))
 #'
+#' ### X-chromosomal kappa
+#' y = nuclearPed(2, sex = 2)
+#' kappaIBD(y, Xchrom = TRUE)
+#'
 #' @export
-kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
+kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE, Xchrom = FALSE) {
 
   if(is.pedList(x)) {
     ids = unlist(ids)
@@ -94,7 +100,7 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
     compNr = unique.default(compNr)
 
     if(length(compNr) == 1)
-      return(kappaIBD(x[[compNr]], ids, inbredAction = inbredAction))
+      return(kappaIBD(x[[compNr]], ids, inbredAction = inbredAction, simplify = simplify, Xchrom = Xchrom))
 
     x = x[compNr]
     nPed = length(x)
@@ -102,7 +108,7 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
 
     # Within-component coefficients
     kapComp = lapply(which(lengths(idsComp) > 1), function(i)
-      kappaIBD(x[[i]], idsComp[[i]], inbredAction = inbredAction, simplify = FALSE))
+      kappaIBD(x[[i]], idsComp[[i]], inbredAction = inbredAction, simplify = FALSE, Xchrom = Xchrom))
     kapTot = do.call(rbind, kapComp)
 
     # Between-components
@@ -112,7 +118,12 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
                                         stringsAsFactors = FALSE))
     return(kapTot)
   }
-  else if(!is.ped(x))
+
+  # If X, delegate to X version
+  if(Xchrom)
+    return(.kappaX(x, ids, inbredAction = inbredAction, simplify = simplify))
+
+  if(!is.ped(x))
     stop2("Input is not a `ped` object")
 
   labs = labels(x)
@@ -131,7 +142,7 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
   if(any(isInbred) && inbredAction > 0) {
     msg = paste0(c(sprintf(" Individual '%s' is inbred (f = %g)", ids[isInbred], INB[ids[isInbred]]),
                   "Kappa coefficients are only defined for non-inbred individuals."), collapse = "\n")
-    switch(inbredAction, {message("Warning:"); message(msg)}, stop2(msg))
+    switch(inbredAction, message(msg), stop2(msg))
   }
 
   # Build result data frame
@@ -141,18 +152,21 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
                    stringsAsFactors = FALSE)
 
   # Rows that needs computing
-  founder_rows = res$id1 %in% founders(x) | res$id2 %in% founders(x)
-  noninbred_rows = INB[res$id1] < .Machine$double.eps &
-    INB[res$id2] < .Machine$double.eps
+  eps = .Machine$double.eps
+  noninbred_rows = INB[res$id1] < eps & INB[res$id2] < eps
+
+  fous = founders(x)
+  fou_rows = res$id1 %in% fous | res$id2 %in% fous
 
   # Noninbred pairs involving founder(s)
-  if(any(noninb_fou_rows <- noninbred_rows & founder_rows)) {
-    k1_fou = 4*KIN[pairs[noninb_fou_rows, , drop = FALSE]]
-    res[noninb_fou_rows, 3:5] = cbind(1 - k1_fou, k1_fou, 0)
+  fou_noninb_rows = fou_rows & noninbred_rows
+  if(any(fou_noninb_rows)) {
+    phi_fou = KIN[pairs[fou_noninb_rows, , drop = FALSE]]
+    res[fou_noninb_rows, 3:5] = cbind(1 - 4*phi_fou, 4*phi_fou, 0)
   }
 
   # Noninbred nonfounders
-  if(any(nn_rows <- noninbred_rows & !founder_rows)) {
+  if(any(nn_rows <- !fou_rows & noninbred_rows)) {
     id1.nn = res$id1[nn_rows]
     id2.nn = res$id2[nn_rows]
     F1 = father(x, id1.nn)
@@ -174,74 +188,91 @@ kappaIBD = function(x, ids = labels(x), inbredAction = 1, simplify = TRUE) {
 }
 
 
-#' @rdname kappaIBD
-#' @export
-kappaIbdX = function(x, ids, sparse = NA, verbose = FALSE) {
-  # TODO!!: Simplify this as in the autosomal case
-  if(!is.ped(x)) stop2("Input is not a `ped` object")
+.kappaX = function(x, ids, inbredAction = 1, simplify = TRUE) {
+  if(!is.ped(x))
+    stop2("Input is not a `ped` object")
 
-  # Enforce parents to precede their children
-  if(!hasParentsBeforeChildren(x))
-    x = parentsBeforeChildren(x)
+  labs = labels(x)
+  ids = as.character(ids)
+  if(!all(ids %in% labs))
+    stop2("Unknown ID label: ", setdiff(ids, labs))
+  if(length(ids) < 2)
+    stop2("At least two ID labels must be indicated")
+  if(dup <- anyDuplicated.default(ids))
+    stop2("Duplicated ID label: ", ids[dup])
 
-  ids_int = internalID(x, ids)
+  SEX = getSex(x, named = TRUE)
+  KIN = kinship(x, Xchrom = TRUE)
+  INB = 2*diag(KIN) - 1 # inbreeding coeffs
 
-  # Setup memoisation
-  mem = initialiseMemo(x, ids_int, sparse = sparse, chromType = "x", verbose = verbose)
-  KIN2 = mem$KIN2
-  INB = 2*diag(KIN2) - 1 # inbreeding coeffs
-  SEX = mem$SEX
-
-  if(verbose && any(INB[SEX == 2] > .Machine$double.eps)) {
-    message("Warning: X-kappas involving inbred females are undefined:")
-    inbred = females(x)[INB[SEX == 2] > .Machine$double.eps]
-    for(id in inbred)
-      message(sprintf("  %s: f = %f", id, INB[id]))
-    message("")
+  isInbred = SEX[ids] == 2 & INB[ids] > .Machine$double.eps
+  if(any(isInbred) && inbredAction > 0) {
+    msg = paste0(c(sprintf("* Individual '%s' is X-inbred (f = %g)", ids[isInbred], INB[ids[isInbred]]),
+                   "X-chromosomal kappa coefficients are only defined for pairs not involving X-inbred females."), collapse = "\n")
+    switch(inbredAction, message(msg), stop2(msg))
   }
 
-  # All unordered pairs
-  pairs = combn(ids_int, 2, simplify = FALSE)
-
-  # System of equations:
-  # k0 + k1 +   k2 = 1
-  #      k1 + 2*k2 = 4*phi_{ab}
-  #      k1 + 4*k2 = 16*phi_{ab,ab}
-  # ==> Solve for k0, k1, k2
-
-  # Compute kappa coefficients
-  kappas = vapply(pairs, function(p) {
-
-    # If the pair includes an inbred female, return NA's
-    if(any(SEX[p] == 2 & INB[p] > .Machine$double.eps))
-      c(NA_real_, NA_real_, NA_real_)
-    else {
-      id1 = p[1]; id2 = p[2]
-      u = KIN2[[id1, id2]]
-      switch(sum(SEX[p] == 2) + 1,
-             c(1 - u, u, NA), # both males
-             c(1 - 2*u, 2*u, NA), # one male, one female
-             { # both female
-               v = phi22(id1, id2, id1, id2, chromType = "x", mem = mem)
-               c(1 - 6*u + 8*v, 8*u - 16*v, 8*v - 2*u)
-             })
-    }
-  }, FUN.VALUE = numeric(3))
-
-  if(verbose)
-    printCounts(mem)
-
-  if(length(ids) == 2)
-    return(kappas[,1])
-
   # Build result data frame
-  labs = labels(x)
-  idcols = do.call(rbind, pairs)
-  res = data.frame(id1 = labs[idcols[, 1]],
-                   id2 = labs[idcols[, 2]],
-                   t.default(kappas),
+  pairs = t.default(combn(ids, 2))
+  res = data.frame(id1 = pairs[, 1], id2 = pairs[, 2],
+                   kappa0 = NA_real_, kappa1 = NA_real_, kappa2 = NA_real_,
                    stringsAsFactors = FALSE)
-  names(res)[3:5] = paste0("kappa", 0:2)
+
+  # Inbred rows should remain NA
+  inbred1 = SEX[res$id1] == 2 & INB[res$id1] > .Machine$double.eps
+  inbred2 = SEX[res$id2] == 2 & INB[res$id2] > .Machine$double.eps
+  inbred_rows = inbred1 | inbred2
+
+
+  ### Male-male
+  mm_rows = SEX[res$id1] == 1 & SEX[res$id2] == 1
+  if(any(mm_rows)) {
+    phi_mm = KIN[pairs[mm_rows, , drop = FALSE]]
+    res[mm_rows, 3:5] = cbind(1 - phi_mm, phi_mm, NA_real_)
+  }
+
+  ### Male-female (or vice versa)
+  mf_rows = (SEX[res$id1] == 1 & SEX[res$id2] == 2) | (SEX[res$id1] == 2 & SEX[res$id2] == 1)
+  mf_rows = mf_rows & !inbred_rows
+
+  if(any(mf_rows)) {
+    phi_mf = KIN[pairs[mf_rows, , drop = FALSE]]
+    res[mf_rows, 3:5] = cbind(1 - 2*phi_mf, 2*phi_mf, NA_real_)
+  }
+
+  #### Female-female
+  ff_rows = (SEX[res$id1] == 2 & SEX[res$id2] == 2) & !inbred_rows
+
+  fous = founders(x)
+  founder_rows = res$id1 %in% fous | res$id2 %in% fous
+
+  # Pairs involving at least one founder
+  ff_fou_rows = ff_rows & founder_rows
+  if(any(ff_fou_rows)) {
+    phi_ff_fou = KIN[pairs[ff_fou_rows, , drop = FALSE]]
+    res[ff_fou_rows, 3:5] = cbind(1 - 4*phi_ff_fou, 4*phi_ff_fou, 0)
+  }
+
+  # Both nonfounders
+  ff_nonfou_rows = ff_rows & !founder_rows
+  if(any(ff_nonfou_rows)) {
+    id1_ff_nonfou = res$id1[ff_nonfou_rows]
+    id2_ff_nonfou = res$id2[ff_nonfou_rows]
+    F1 = father(x, id1_ff_nonfou)
+    M1 = mother(x, id1_ff_nonfou)
+    F2 = father(x, id2_ff_nonfou)
+    M2 = mother(x, id2_ff_nonfou)
+
+    k2 = KIN[cbind(F1, F2)]*KIN[cbind(M1, M2)] + KIN[cbind(F1, M2)]*KIN[cbind(M1, F2)]
+    k1 = 4*KIN[pairs[ff_nonfou_rows, , drop = FALSE]] - 2*k2
+    k0 = 1 - k1 - k2
+    res[ff_nonfou_rows, 3:5] = cbind(k0, k1, k2)
+  }
+
+  # Simplify output for a single pair
+  if(simplify && length(ids) == 2)
+    res = as.numeric(res[1, 3:5])
 
   res
 }
+

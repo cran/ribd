@@ -4,7 +4,14 @@
 \alias{condensedIdentity}
 \title{Condensed identity coefficients}
 \usage{
-condensedIdentity(x, ids, sparse = NA, verbose = FALSE, checkAnswer = verbose)
+condensedIdentity(
+  x,
+  ids,
+  sparse = NA,
+  simplify = TRUE,
+  self = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{A pedigree in the form of a \code{\link[pedtools:ped]{pedtools::ped}} object}
@@ -17,20 +24,21 @@ using sparse arrays (as implemented by the
 \href{https://CRAN.R-project.org/package=slam}{slam} package) instead of
 ordinary arrays.}
 
-\item{verbose}{A logical}
+\item{simplify}{Simplify the output (to a numeric of length 9) if \code{ids} has
+length 2. Default: TRUE.}
 
-\item{checkAnswer}{A logical. If TRUE, and the \code{identity} package is
-installed, the result is checked against the output of
-\code{\link[identity:identity.coefs]{identity::identity.coefs()}}. This option is ignored if any of the founders
-are inbred, or if \code{ids} has length greater than 2.}
+\item{self}{A logical indicating if self-relationships (e.g., between a
+pedigree member and itself) should be included. FALSE by default.}
+
+\item{verbose}{A logical}
 }
 \value{
-If \code{ids} has length 2: A vector of length 9, containing the condensed
-identity coefficients.
+If \code{ids} has length 2 and \code{simplify = TRUE}: A vector of length 9,
+containing the condensed identity coefficients.
 
-If \code{ids} has length > 2: A data frame with one row for each pair of
-individuals, and 11 columns. The first two columns contain the ID labels,
-and columns 3-11 contain the condensed identity coefficients.
+Otherwise, a data frame with 11 columns and one row for each pair of
+individuals. The first two columns contain the ID labels, and columns 3-11
+contain the condensed identity coefficients.
 }
 \description{
 Computes the 9 condensed identity coefficients of pairwise relationships in a
@@ -59,5 +67,5 @@ G. Karigl (1981). \emph{A recursive algorithm for the calculation of
 identity coefficients} Annals of Human Genetics, vol. 45.
 }
 \seealso{
-\code{\link[=kappa]{kappa()}}, \code{\link[=condensedIdentityX]{condensedIdentityX()}}, \code{\link[pedtools:founderInbreeding]{pedtools::founderInbreeding()}}
+\code{\link[=kappa]{kappa()}}, \code{\link[=identityCoefs]{identityCoefs()}}, \code{\link[pedtools:founderInbreeding]{pedtools::founderInbreeding()}}
 }

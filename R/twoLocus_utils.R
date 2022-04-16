@@ -244,7 +244,7 @@ initialiseTwoLocusMemo = function(ped, rho, recomb = NULL, chromType = "autosoma
   mem = new.env()
 
   # Start timing
-  st = Sys.time()
+  mem$st = Sys.time()
 
   mem$FIDX = ped$FIDX
   mem$MIDX = ped$MIDX
@@ -263,7 +263,7 @@ initialiseTwoLocusMemo = function(ped, rho, recomb = NULL, chromType = "autosoma
   mem$anc = hasCommonAncestor(ped)
 
   # Compute kinship matrix directly
-  mem$k1 = switch(chromType, autosomal = kinship(ped), x = kinshipX(ped))
+  mem$k1 = kinship(ped, Xchrom = chromType == "x")
 
   # Storage for two-locus kinship values
   mem$k2 = list()
@@ -291,10 +291,6 @@ initialiseTwoLocusMemo = function(ped, rho, recomb = NULL, chromType = "autosoma
   # Counters
   for(cou in counters)
     assign(cou, 0, envir = mem)
-
-  # Start time
-  mem$st = st
-  mem$initTime = Sys.time() - st
 
   mem
 }
