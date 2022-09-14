@@ -29,7 +29,7 @@ are computed; otherwise the 15 detailed identity coefficients.}
 
 \item{Xchrom}{A logical, by default FALSE.}
 
-\item{self}{A logical indicating if self-relationships (e.g., between a
+\item{self}{A logical indicating if self-relationships (i.e., between a
 pedigree member and itself) should be included. FALSE by default.}
 
 \item{simplify}{Simplify the output (to a numeric of length 9) if \code{ids} has
@@ -61,7 +61,7 @@ X-chromosomal coefficients.
 \details{
 Both the condensed and detailed coefficients are given in the orders used by
 Jacquard (1974). The function \code{detailed2condensed()} converts from detailed
-coefficients (d1, ... d15) to condensed ones (D1, ..., D9) using the
+coefficients (d1, ..., d15) to condensed ones (D1, ..., D9) using the
 following relations:
 \itemize{
 \item D1 = d1
@@ -152,7 +152,7 @@ coefficients. Ann. Hum. Genet.
 linkage analysis. Am. J. Hum. Genet
 \item Lange, K. & Sinsheimer, J.s. (1992). Calculation of genetic identity
 coefficients. Ann. Hum. Genet.
-\item Abney, Mark (2009). A graphical algorithm for fast computation of identity
+\item Abney, M. (2009). A graphical algorithm for fast computation of identity
 coefficients and generalized kinship coefficients. Bioinformatics, 25,
 1561-1563. \url{https://home.uchicago.edu/~abney/abney_web/Software.html}
 }

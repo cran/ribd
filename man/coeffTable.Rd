@@ -4,7 +4,13 @@
 \alias{coeffTable}
 \title{Table of pairwise relatedness coefficients}
 \usage{
-coeffTable(x, ids = labels(x), coeffs = c("f", "phi", "deg", "kappa", "Delta"))
+coeffTable(
+  x,
+  ids = labels(x),
+  coeff = c("f", "phi", "deg", "kappa", "identity", "detailed"),
+  self = FALSE,
+  Xchrom = FALSE
+)
 }
 \arguments{
 \item{x}{A pedigree in the form of a pedtools::ped object.}
@@ -12,26 +18,44 @@ coeffTable(x, ids = labels(x), coeffs = c("f", "phi", "deg", "kappa", "Delta"))
 \item{ids}{A character (or coercible to character) containing ID labels of
 two or more pedigree members.}
 
-\item{coeffs}{A character vector containing one or more of the keywords "f",
-"phi", "deg", "kappa", "Delta".}
+\item{coeff}{A character vector containing one or more of the keywords "f",
+"phi", "deg", "kappa", "identity", "detailed".}
+
+\item{self}{A logical indicating if self-relationships should be included.
+Default: FALSE.}
+
+\item{Xchrom}{A logical indicating if the coefficients should be autosomal
+(default) or X-chromosomal. If \code{Xchrom = NA}, both sets are included.}
 }
 \value{
-A data frame.
+A data frame with one row for each pair of individuals. The first two
+columns are characters named \code{id1} and \code{id2}, while remaining columns are
+numeric. Columns containing X-chromosomal coefficients are suffixed with
+".X".
+
+If "f" (inbreeding) is the only coefficient, the data frame has one row per
+individual, and the first column is named \code{id}.
+
+Note: If \code{x} has members with unknown sex, all X-chromosomal coefficients
+are NA.
 }
 \description{
 Creates a data frame containing various relatedness coefficients between all
 pairs of individuals in a given pedigree.
 }
 \details{
-Available coefficients (indicated in \code{coeffs}) include:
+Available coefficients (indicated in \code{coeff}) include:
 \itemize{
-\item f: The inbreeding coefficient of each pair member. Columns: \code{f1} and \code{f2}.
-\item phi: The kinship coefficient. Column: \code{phi}.
-\item deg: The degree of relationship, as computed by \link{kin2deg}. Column: \code{deg}
-\item kappa: The IBD coefficients computed by \link{kappaIBD}. (These are NA for pairs
-involving inbred individuals.) Columns: \code{kappa0}, \code{kappa1}, \code{kappa2}.
-\item Delta: The condensed identity coefficients of Jacquard, computed by
-\code{\link[=condensedIdentity]{condensedIdentity()}}. Columns: \code{D1}, ..., \code{D9}.
+\item \code{f}: The inbreeding coefficient of each pair member. Columns: \code{f1} and
+\code{f2}.
+\item \code{phi}: The kinship coefficient. Column: \code{phi}.
+\item \code{deg}: The degree of relationship, as computed by \link{kin2deg}. Column: \code{deg}
+\item \code{kappa}: The IBD coefficients computed by \link{kappaIBD}. (These are NA for
+pairs involving inbred individuals.) Columns: \code{k0}, \code{k1}, \code{k2}.
+\item \code{identity}: The 9 condensed identity coefficients of Jacquard, computed by
+\code{\link[=identityCoefs]{identityCoefs()}}. Columns: \code{D1}, ..., \code{D9}.
+\item \code{detailed}: The detailed identity coefficients of Jacquard, computed by
+\code{identityCoefs(..., detailed = TRUE)}. Columns: \code{d1}, ..., \code{d15}.
 }
 }
 \examples{
@@ -42,8 +66,15 @@ x = addSon(nuclearPed(2), 4)
 coeffTable(x)
 
 # Only relevant coefficients
-coeffTable(x, coeffs = c("phi", "deg", "kappa"))
+coeffTable(x, coeff = c("phi", "deg", "kappa"))
 
 # Only the uncle-nephew pair
-coeffTable(x, ids = c(3, 6), coeffs = c("phi", "deg", "kappa"))
+coeffTable(x, ids = c(3, 6), coeff = c("phi", "deg", "kappa"))
+
+# X-chromosomal coefficients
+coeffTable(x, Xchrom = TRUE)
+
+# Both autosomal and X
+coeffTable(x, Xchrom = NA)
+
 }

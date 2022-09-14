@@ -16,7 +16,7 @@
 #'   ordinary arrays.
 #' @param simplify Simplify the output (to a numeric of length 9) if `ids` has
 #'   length 2. Default: TRUE.
-#' @param self A logical indicating if self-relationships (e.g., between a
+#' @param self A logical indicating if self-relationships (i.e., between a
 #'   pedigree member and itself) should be included. FALSE by default.
 #' @param verbose A logical
 #'
@@ -28,7 +28,7 @@
 #'   contain the condensed identity coefficients.
 #'
 #' @references G. Karigl (1981). _A recursive algorithm for the calculation of
-#'   identity coefficients_ Annals of Human Genetics, vol. 45.
+#'   identity coefficients._ Annals of Human Genetics, vol. 45.
 #'
 #' @seealso [kappa()], [identityCoefs()], [pedtools::founderInbreeding()]
 #'

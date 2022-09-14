@@ -3,27 +3,45 @@
 #' Creates a data frame containing various relatedness coefficients between all
 #' pairs of individuals in a given pedigree.
 #'
-#' Available coefficients (indicated in `coeffs`) include:
+#' Available coefficients (indicated in `coeff`) include:
 #'
-#' * f: The inbreeding coefficient of each pair member. Columns: `f1` and `f2`.
+#' * `f`: The inbreeding coefficient of each pair member. Columns: `f1` and
+#' `f2`.
 #'
-#' * phi: The kinship coefficient. Column: `phi`.
+#' * `phi`: The kinship coefficient. Column: `phi`.
 #'
-#' * deg: The degree of relationship, as computed by [kin2deg]. Column: `deg`
+#' * `deg`: The degree of relationship, as computed by [kin2deg]. Column: `deg`
 #'
-#' * kappa: The IBD coefficients computed by [kappaIBD]. (These are NA for pairs
-#' involving inbred individuals.) Columns: `kappa0`, `kappa1`, `kappa2`.
+#' * `kappa`: The IBD coefficients computed by [kappaIBD]. (These are NA for
+#' pairs involving inbred individuals.) Columns: `k0`, `k1`, `k2`.
 #'
-#' * Delta: The condensed identity coefficients of Jacquard, computed by
-#' [condensedIdentity()]. Columns: `D1`, ..., `D9`.
+#' * `identity`: The 9 condensed identity coefficients of Jacquard, computed by
+#' [identityCoefs()]. Columns: `D1`, ..., `D9`.
+#'
+#' * `detailed`: The detailed identity coefficients of Jacquard, computed by
+#' `identityCoefs(..., detailed = TRUE)`. Columns: `d1`, ..., `d15`.
 #'
 #' @param x A pedigree in the form of a pedtools::ped object.
 #' @param ids A character (or coercible to character) containing ID labels of
 #'   two or more pedigree members.
-#' @param coeffs A character vector containing one or more of the keywords "f",
-#'   "phi", "deg", "kappa", "Delta".
+#' @param coeff A character vector containing one or more of the keywords "f",
+#'   "phi", "deg", "kappa", "identity", "detailed".
+#' @param self A logical indicating if self-relationships should be included.
+#'   Default: FALSE.
+#' @param Xchrom A logical indicating if the coefficients should be autosomal
+#'   (default) or X-chromosomal. If `Xchrom = NA`, both sets are included.
 #'
-#' @return A data frame.
+#' @return A data frame with one row for each pair of individuals. The first two
+#'   columns are characters named `id1` and `id2`, while remaining columns are
+#'   numeric. Columns containing X-chromosomal coefficients are suffixed with
+#'   ".X".
+#'
+#'   If "f" (inbreeding) is the only coefficient, the data frame has one row per
+#'   individual, and the first column is named `id`.
+#'
+#'   Note: If `x` has members with unknown sex, all X-chromosomal coefficients
+#'   are NA.
+#'
 #'
 #' @examples
 #' # Uncle-nephew pedigree
@@ -33,47 +51,105 @@
 #' coeffTable(x)
 #'
 #' # Only relevant coefficients
-#' coeffTable(x, coeffs = c("phi", "deg", "kappa"))
+#' coeffTable(x, coeff = c("phi", "deg", "kappa"))
 #'
 #' # Only the uncle-nephew pair
-#' coeffTable(x, ids = c(3, 6), coeffs = c("phi", "deg", "kappa"))
+#' coeffTable(x, ids = c(3, 6), coeff = c("phi", "deg", "kappa"))
+#'
+#' # X-chromosomal coefficients
+#' coeffTable(x, Xchrom = TRUE)
+#'
+#' # Both autosomal and X
+#' coeffTable(x, Xchrom = NA)
+#'
 #' @export
-coeffTable = function(x, ids = labels(x), coeffs = c("f", "phi", "deg", "kappa", "Delta")) {
-  coeffs = match.arg(coeffs, several.ok = TRUE)
+coeffTable = function(x, ids = labels(x), coeff = c("f", "phi", "deg", "kappa", "identity", "detailed"),
+                      self = FALSE, Xchrom = FALSE) {
 
-  kappa = kappaIBD(x, ids = ids, simplify = FALSE, inbredAction = 0)
-  id1 = kappa$id1
-  id2 = kappa$id2
+  if(!is.ped(x)) {
+    if(is.pedList(x))
+      stop2("Lists of pedigrees are currently not supported in `coeffTable()`")
+    else
+      stop2("Illegal input. Expected `ped`, received: ", class(x))
+  }
+
+  if(anyDuplicated.default(ids))
+    stop2("Duplicated ID label: ", unique(ids[duplicated(ids)]))
+
+  coeff = match.arg(coeff, several.ok = TRUE)
+
+  # If only inbreeding, treat separately and return
+  if(length(coeff) == 1 && coeff == "f"){
+    res = data.frame(id = ids)
+    if(is.na(Xchrom) || !Xchrom)
+      res = cbind(res, f = inbreeding(x, ids))
+    if(is.na(Xchrom) || Xchrom) {
+      xf = if(any(x$SEX == 0)) rep(NA_real_, length(ids)) else inbreeding(x, ids, Xchrom = TRUE)
+      res = cbind(res, `X-f` = xf)
+    }
+    return(res)
+  }
+
+  # Xchrom = NA: both autosomal and X
+  if(is.na(Xchrom)) {
+    aut = coeffTable(x, ids, coeff = coeff, Xchrom = FALSE, self = self)
+    xchr = coeffTable(x, ids, coeff = coeff, Xchrom = TRUE, self = self)
+    return(cbind(aut, xchr[, -(1:2), drop = FALSE]))
+  }
+
+
+  # If Xchrom & unknown sex: Fill with NAs
+  if(Xchrom && any(x$SEX == 0)) {
+    # horrible hack: compute autosomal version to get proper names and dimensions
+    res = coeffTable(x, ids, coeff = coeff, self = self)
+    res[, -(1:2)] = NA_real_
+    names(res)[-(1:2)] = paste0("X-", names(res)[-(1:2)])
+    return(res)
+  }
 
   # Initialise output data frame
-  res = data.frame(id1 = id1, id2 = id2)
+  idmat = .idPairs(ids, self = self, as = "character", returnList = FALSE)
+  res = data.frame(id1 = idmat[,1], id2 = idmat[,2])
 
-  if("f" %in% coeffs) {
-    inb = inbreeding(x, ids = ids)
-    res = cbind(res, f1 = inb[id1], f2 = inb[id2])
+  if("f" %in% coeff) {
+    inb = inbreeding(x, ids = ids, Xchrom = Xchrom)
+    res = cbind(res, f1 = inb[res$id1], f2 = inb[res$id2])
   }
 
-  if("phi" %in% coeffs || "deg" %in% coeffs) {
-    phiMat = kinship(x)
-    phi = phiMat[cbind(id1, id2)]
+  # Kinship matrix: needed if phi and/or deg are included
+  if("phi" %in% coeff || "deg" %in% coeff) {
+    phiMat = kinship(x, Xchrom = Xchrom)
+    phi = phiMat[cbind(res$id1, res$id2)]
   }
 
-  if("phi" %in% coeffs) {
+  if("phi" %in% coeff) {
     res = cbind(res, phi = phi)
   }
 
-  if("deg" %in% coeffs) {
+  if("deg" %in% coeff) {
     res = cbind(res, deg = kin2deg(phi, unrelated = NA_integer_))
   }
 
-  if("kappa" %in% coeffs) {
-    res = cbind(res, kappa[, -(1:2)])
+  if("kappa" %in% coeff) {
+    kappa = kappaIBD(x, ids = ids, simplify = FALSE, inbredAction = 0, Xchrom = Xchrom)
+    names(kappa)[3:5] = paste0("k", 0:2) # abbreviate prefix from "kappa" to "k"
+    res = merge(res, kappa, by = 1:2, all.x = TRUE)
   }
 
-  if("Delta" %in% coeffs) {
-    delta = condensedIdentity(x, ids = ids, simplify = FALSE, verbose = FALSE)
+  if("identity" %in% coeff) {
+    delta = identityCoefs(x, ids = ids, detailed = FALSE, simplify = FALSE, self = self,
+                          Xchrom = Xchrom, verbose = FALSE)
     res = cbind(res, delta[, -(1:2)])
   }
+
+  if("detailed" %in% coeff) {
+    delta = identityCoefs(x, ids = ids, detailed = TRUE, simplify = FALSE, self = self,
+                          Xchrom = Xchrom, verbose = FALSE)
+    res = cbind(res, delta[, -(1:2)])
+  }
+
+  if(Xchrom)
+    names(res)[-(1:2)] = paste0(names(res)[-(1:2)], ".X")
 
   res
 }

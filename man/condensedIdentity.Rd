@@ -27,7 +27,7 @@ ordinary arrays.}
 \item{simplify}{Simplify the output (to a numeric of length 9) if \code{ids} has
 length 2. Default: TRUE.}
 
-\item{self}{A logical indicating if self-relationships (e.g., between a
+\item{self}{A logical indicating if self-relationships (i.e., between a
 pedigree member and itself) should be included. FALSE by default.}
 
 \item{verbose}{A logical}
@@ -64,7 +64,7 @@ condensedIdentity(x, ids = 5:6)
 }
 \references{
 G. Karigl (1981). \emph{A recursive algorithm for the calculation of
-identity coefficients} Annals of Human Genetics, vol. 45.
+identity coefficients.} Annals of Human Genetics, vol. 45.
 }
 \seealso{
 \code{\link[=kappa]{kappa()}}, \code{\link[=identityCoefs]{identityCoefs()}}, \code{\link[pedtools:founderInbreeding]{pedtools::founderInbreeding()}}

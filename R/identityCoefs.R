@@ -9,7 +9,7 @@
 #'
 #' Both the condensed and detailed coefficients are given in the orders used by
 #' Jacquard (1974). The function `detailed2condensed()` converts from detailed
-#' coefficients (d1, ... d15) to condensed ones (D1, ..., D9) using the
+#' coefficients (d1, ..., d15) to condensed ones (D1, ..., D9) using the
 #' following relations:
 #'
 #' * D1 = d1
@@ -78,7 +78,7 @@
 #' @param detailed A logical. If FALSE (default), the 9 condensed coefficients
 #'   are computed; otherwise the 15 detailed identity coefficients.
 #' @param Xchrom A logical, by default FALSE.
-#' @param self A logical indicating if self-relationships (e.g., between a
+#' @param self A logical indicating if self-relationships (i.e., between a
 #'   pedigree member and itself) should be included. FALSE by default.
 #' @param method Either "auto", "K", "WL", "LS", "GC", "idcoefs", "identity" or
 #'   "merlin". By default ("auto") a suitable algorithm is chosen automatically.
@@ -109,7 +109,7 @@
 #' * Lange, K. & Sinsheimer, J.s. (1992). Calculation of genetic identity
 #' coefficients. Ann. Hum. Genet.
 #'
-#' * Abney, Mark (2009). A graphical algorithm for fast computation of identity
+#' * Abney, M. (2009). A graphical algorithm for fast computation of identity
 #' coefficients and generalized kinship coefficients. Bioinformatics, 25,
 #' 1561-1563. <https://home.uchicago.edu/~abney/abney_web/Software.html>
 #'
@@ -410,6 +410,9 @@ detailed2condensed = function(d) {
     idcols = d[, 1:2]
     d = d[,-(1:2)] # coefficient columns
 
+    if(!all(rowSums(d, na.rm = TRUE) == 1))
+      stop2("Detailed coefficients do not sum to 1")
+
     return(cbind(idcols,
       D1 = d[[1]],
       D2 = d[[6]],
@@ -423,6 +426,9 @@ detailed2condensed = function(d) {
   }
 
   # Else: Numeric vector
+  if(!isTRUE(all.equal(sum(d, na.rm = TRUE), 1)))
+    stop2("Detailed coefficients do not sum to 1")
+
   c(d[[1]],
     d[[6]],
     d[[2]] + d[[3]],
