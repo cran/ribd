@@ -1,6 +1,6 @@
-a48e9ab9154accaa5cd70ccf3ec64e41 *DESCRIPTION
+d52d309bd450338595b8db19ebbb441d *DESCRIPTION
 27b403e74540224240964dbb31c12fb5 *NAMESPACE
-490c7a0051a3c6145fd58d228069acde *NEWS.md
+7c4b95797f0fac0b391ca25ebc4168ce *NEWS.md
 e443f15ce84c2ec4440068ebbfc7e60a *R/ELR.R
 4ea31d52808e6a70a2265673a245486c *R/coeffTable.R
 6200fc87931f3b4e3902a723ee172acb *R/condensedIdentity.R
@@ -10,7 +10,7 @@ e443f15ce84c2ec4440068ebbfc7e60a *R/ELR.R
 da0bd744e010d1557f4e296d42f4bbc5 *R/gKinship.R
 b3066ca24ab523fe2ee73176ce378dec *R/gip.R
 ee7ede82dce6df3dcfe19558a28536ca *R/ibdDraw.R
-05573e6019a49cbe890cbac00a4ed80d *R/ibdTriangle.R
+e563b325dd42a78be2894e42cafa8d9d *R/ibdTriangle.R
 9297c6a0ef114f37f1b7e0ad897fe60c *R/identityCoefs.R
 0aad31e8fb409c8c93314c486b10c9f7 *R/identity_GC.R
 2c2cdebe3d63ff99c62460cb3ade7012 *R/identity_Karigl.R
@@ -18,9 +18,9 @@ d4f31872335fb0307d54ff09ca9a9f7b *R/identity_LS.R
 499a805ca347cf4596a0370cec9239b5 *R/identity_WL.R
 72e283c749cdab7c14dba75b4524f7e7 *R/identity_idcoefs.R
 977cb4248fae377bea9e2c718cb5bc99 *R/inbreeding.R
-0b03c308ddbed64565faf6b5a84267a8 *R/kappaIbd.R
-b641b7d8fc2a3b197b25052f8e38b157 *R/kinship.R
-b90e4cb63eb5dc9fd0d0a02a85985780 *R/multiPersonIBD.R
+f9f33434bd9c476af1abc113644ba468 *R/kappaIbd.R
+f78b39e5db5d88f988ea518214d1f3d0 *R/kinship.R
+594f917faf40a9d77f1b02cc1f8eb05e *R/multiPersonIBD.R
 7415684fdb238fcf6f209ed27f4f008d *R/realisedIbdVariance.R
 24054853b84c1ab1877e3251912c6605 *R/ribd-package.R
 37c06dfa0f731c15f98c6e432b3f00ad *R/sysdata.rda
@@ -34,7 +34,7 @@ e4214bb87e72d725538a8a7d12187de1 *R/twoLocusIdentity.R
 ed3e22ac7507111ed97732b7ee37110c *R/twoLocus_utils.R
 c1f31460ca721c018c4593e6cba269f6 *R/utils.R
 76df9ae35ef07d75996c33c56ddd2357 *README.md
-24bc7c3f5a645905c53152bd3d0b8f61 *build/partial.rdb
+1dda19015f0aa969acee990c150e3ac9 *build/partial.rdb
 3f7639dc8d5e585b510f907589b7f4e2 *data/basicRelationships.rda
 1f4831fcefddf691d575b9219f095057 *data/jicaque.rda
 bdbc05115dbc86b5b98436d03f5a8cf3 *inst/CITATION
@@ -63,11 +63,11 @@ d65f4bcc9efe8917c6574b890cbcb9e8 *man/figures/jacquardStatesX.pptx
 3198ae094f871e0087126b9293454b8d *man/identityCoefs.Rd
 855a3ab148d8613694b62d491f3c4fd8 *man/inbreeding.Rd
 7f6765c620fbe149e66976575b67dadd *man/jicaque.Rd
-427cf1c04932a8c88a6dc721067f5d18 *man/kappaIBD.Rd
+fcdf4c6b505dd20731171fb584f915e4 *man/kappaIBD.Rd
 cd594e0f0ab9ec6ac65b56bd4cb3b07d *man/kin2deg.Rd
 afd368551dd01a3e88c937743cd90de1 *man/kinship.Rd
 05deb0cc94f9d9037b803728ae416443 *man/minimalPattern.Rd
-0e23bfa87193791892ae6c37288f7243 *man/multiPersonIBD.Rd
+611e000e3a4fe365524ff9f134f0eb25 *man/multiPersonIBD.Rd
 5b71c1e08d2fd617cfbc387472b26fa5 *man/realisedIbdVariance.Rd
 bf8ed38489e4aa4b7be391da3da158a8 *man/ribd-package.Rd
 e7ce72b2114e3e48968d2cb700305ff0 *man/showInTriangle.Rd
